@@ -4,42 +4,50 @@ const app = express();
 
 app.use(express.json());
 
+// CORS Header Setup (StreamX Website එකට ඩේටා ලබාගැනීම සපයයි)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
 // 1. Home Route
 app.get('/', (req, res) => {
     res.json({
         status: "Online",
-        service: "StreamX Unlimited Cricket API",
+        service: "StreamX Unlimited Live Score API",
         endpoint: "/api/live-scores"
     });
 });
 
-// 2. Unlimited Live Scores Route
+// 2. Public Direct Live Cricket Score API Route
 app.get('/api/live-scores', async (req, res) => {
     try {
-        // නිදහස් සහ සජීවී ක්‍රිකට් දත්ත ලබා දෙන ප්‍රසිද්ධ සජීවී ෆීඩ් එකක් හරහා දත්ත ලබා ගැනීම
-        const response = await axios.get('https://raw.githubusercontent.com/etiennepinchon/cricket-api/master/matches.json', {
-            timeout: 5000
+        // Direct Unlimited Open Live Score Data Feed
+        const response = await axios.get('https://raw.githubusercontent.com/cricapi/cricket-json-data/main/live_matches.json', {
+            headers: { 'User-Agent': 'Mozilla/5.0' },
+            timeout: 8000
         });
 
         res.json({
             success: true,
-            source: "Live Public Feed",
-            data: response.data
+            type: "Unlimited Live Feed",
+            matches: response.data
         });
 
     } catch (error) {
-        // කිසියම් හේතුවකින් එය අසාර්ථක වුවහොත් විකල්ප ක්‍රමයක් මඟින් දත්ත ලබා දීම
+        // Backup Direct Score Feed 
         try {
-            const altResponse = await axios.get('https://cricket.yahoo.net/siterender/live-score');
+            const backupRes = await axios.get('https://api.cricapi.com/v1/cricScore?apikey=demo');
             res.json({
                 success: true,
-                source: "Yahoo Feed",
-                data: altResponse.data
+                type: "Backup Live Feed",
+                matches: backupRes.data.data || backupRes.data
             });
-        } catch (err) {
+        } catch (backupErr) {
             res.status(500).json({ 
                 success: false, 
-                error: "Could not fetch live scores at the moment", 
+                error: "Failed to fetch live scores", 
                 details: error.message 
             });
         }
@@ -48,5 +56,5 @@ app.get('/api/live-scores', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-    console.log(`StreamX Live Score API running on port ${PORT}`);
+    console.log(`StreamX Score API running on port ${PORT}`);
 });
