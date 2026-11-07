@@ -1,14 +1,15 @@
 {
-  "name": "streamx-score-api",
+  "name": "streamx-unlimited-score-api",
   "version": "1.0.0",
-  "description": "Standalone Live Cricket Score API for StreamX",
+  "description": "Unlimited Live Cricket Score Scraper API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "node-fetch": "^3.3.2"
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.19.2"
   },
   "engines": {
     "node": ">=18.0.0"
